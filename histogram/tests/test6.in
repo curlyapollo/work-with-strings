@@ -1,0 +1,90 @@
+#include <iostream>
+#include <memory>
+#include <string>
+
+class Expression {
+public:
+    virtual int Evaluate() const = 0;
+    virtual std::string ToString() const = 0;
+    virtual ~Expression() {}
+};
+
+using ExpressionPtr = std::shared_ptr<Expression>;
+
+class Sum : public Expression {
+    ExpressionPtr lhs, rhs;
+
+public:
+    Sum(ExpressionPtr l, ExpressionPtr r) : lhs(l), rhs(r) {}
+
+    int Evaluate() const override {
+        return lhs->Evaluate() + rhs->Evaluate();
+    }
+
+    std::string ToString() const override {
+        return lhs->ToString() + " + " + rhs->ToString();
+    }
+};
+
+class Product : public Expression {
+    ExpressionPtr lhs, rhs;
+
+public:
+    Product(ExpressionPtr l, ExpressionPtr r) : lhs(l), rhs(r) {}
+
+    int Evaluate() const override {
+        return lhs->Evaluate() * rhs->Evaluate();
+    }
+
+    std::string ToString() const override {
+        std::string s = "";
+        auto lhs_v = lhs.get();
+        auto rhs_v = rhs.get();
+        if (typeid(*(lhs_v)) == typeid(class Sum))
+            s += "(" + lhs->ToString() + ") * ";
+        else
+            s += lhs->ToString() + " * ";
+        if (typeid(*(rhs_v)) == typeid(class Sum))
+            s += "(" + rhs->ToString() + ")";
+        else
+            s += rhs->ToString();
+        return s;
+    }
+};
+
+class Const : public Expression {
+    int c;
+
+public:
+    Const(int val) : c(val) {}
+
+    int Evaluate() const override {
+        return c;
+    }
+
+    std::string ToString() const override {
+        return std::to_string(c);
+    }
+};
+
+ExpressionPtr Const(int val) {
+    return ExpressionPtr(new class Const(val));
+}
+
+ExpressionPtr Product(ExpressionPtr l, ExpressionPtr r) {
+    return ExpressionPtr(new class Product(l, r));
+}
+
+ExpressionPtr Sum(ExpressionPtr l, ExpressionPtr r) {
+    return ExpressionPtr(new class Sum(l, r));
+}
+
+int main() {
+    ExpressionPtr ex1 = Sum(Product(Const(3), Const(4)), Const(5));
+    std::cout << ex1->ToString() << "\n";  // 3 * 4 + 5
+    std::cout << ex1->Evaluate() << "\n";  // 17
+
+    ExpressionPtr ex2 = Product(Const(6), ex1);
+    std::cout << ex2->ToString() << "\n";  // 6 * (3 * 4 + 5)
+    std::cout << ex2->Evaluate() << "\n";  // 102
+}

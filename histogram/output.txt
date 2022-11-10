@@ -1,0 +1,5 @@
+if 1
+else 0
+for 3
+int 15
+void 2

@@ -1,0 +1,55 @@
+#include <map>
+#include <string>
+#include <vector>
+
+struct Node {
+    std::map<std::string, Node> children;
+};
+
+class Tree {
+private:
+    Node root;
+
+public:
+    bool Has(const std::vector<std::string>& node) const;
+
+    void Insert(const std::vector<std::string>& node);
+
+    void Delete(const std::vector<std::string>& node);
+};
+
+
+bool Tree::Has(const std::vector<std::string> &node) const {
+    const Node* root1 = &root;
+    for (auto el : node) {
+        if (!root1->children.contains(el)) {
+            return false;
+        }
+        root1 = &root1->children.at(el);
+    }
+    return true;
+}
+
+void Tree::Insert(const std::vector<std::string> &node) {
+    Node* root1 = &(root);
+    for (auto el : node) {
+        if (!root1->children.contains(el)) {
+            root1->children[el] = Node();
+        }
+        root1 = &root1->children[el];
+    }
+}
+
+
+void Tree::Delete(const std::vector<std::string> &node) {
+    Node* root1(&root);
+    for (size_t i = 0; i < node.size() - 1; ++i) {
+        if (!root1->children.contains(node[i])) {
+            return;
+        }
+        root1 = &root1->children[node[i]];
+    }
+    if (root1->children.contains(node[node.size() - 1])) {
+        root1->children.erase(node[node.size() - 1]);
+    }
+}

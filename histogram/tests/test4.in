@@ -1,0 +1,95 @@
+#include <exception>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <vector>
+
+using std::cout;
+using std::string;
+using std::vector;
+
+class TooHardObjectException : public std::exception {
+};
+
+class MainClassifier {
+public:
+    explicit MainClassifier(const string& s)
+    : data_(s)
+    {
+        cout << "Created MainClassifier()\n";
+    }
+
+    double classify(const string& s) {
+        cout << "Called MainClassifier::classify(\"" << s << "\")\n";
+
+        std::istringstream iss(s);
+        vector<string> tokens{std::istream_iterator<string>{iss},
+                              std::istream_iterator<string>{}};
+        return std::stod(tokens[2]);
+    }
+
+private:
+    string data_;
+};
+
+class FastClassifier {
+public:
+    explicit FastClassifier(const string& s)
+    : data_(s)
+    {
+        cout << "Created FastClassifier()\n";
+    }
+
+    double classify(const string& s) {
+        cout << "Called FastClassifier::classify(\"" << s << "\")\n";
+        std::istringstream iss(s);
+        vector<string> tokens{std::istream_iterator<string>{iss},
+                              std::istream_iterator<string>{}};
+        if (tokens[1] == "hard") {
+            throw TooHardObjectException();
+        } else {
+            return std::stod(tokens[0]);
+        }
+    }
+
+private:
+    string data_;
+};
+
+
+class CombinedClassifier {
+public:
+    CombinedClassifier(const string& s1, const string& s2) : data2(s2) {
+        fc = new FastClassifier(s1);
+    }
+
+    double classify(const string& s) {
+        try {
+            return fc->classify(s);
+        }
+        catch (const TooHardObjectException& e) {
+            if (!mc)
+                mc = new MainClassifier(data2);
+            return mc->classify(s);
+        }
+    }
+
+    ~CombinedClassifier() {
+        if (mc) {
+            delete mc;
+        }
+        if (fc) {
+            delete fc;
+        }
+    }
+private:
+    string data2;
+    FastClassifier* fc;
+    MainClassifier* mc{};
+};
+
+int main() {
+    CombinedClassifier c("avc", "sdf");
+    c.classify("1 ha4rd 5");
+}

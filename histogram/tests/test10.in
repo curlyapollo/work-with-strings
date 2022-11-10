@@ -1,0 +1,47 @@
+#include <iostream>
+#include <vector>
+
+class Model {
+public:
+    std::vector<int> data;
+    void save(std::ostream& out) const;
+    void load(std::istream& in);
+};
+
+void Model::save(std::ostream& out) const {
+    auto size = data.size();
+    out.write(reinterpret_cast<char const*>(&size), sizeof(size));
+    out.write(reinterpret_cast<char const*>(data.data()), data.size() * sizeof(int));
+}
+
+void Model::load(std::istream& in) {
+    decltype(data.size()) size;
+    in.read(reinterpret_cast<char*>(&size), sizeof(size));
+    data.resize(size);
+    in.read(reinterpret_cast<char*>(data.data()), data.size() * sizeof(int));
+}
+
+#include "model.h"
+
+#include <iostream>
+#include <sstream>
+
+int main() {
+    // заклинание для ускорения потокового ввода-вывода
+    std::ios::sync_with_stdio(false);
+
+    Model m1;
+    m1.data = {1, 2, 3, 4, 5, 6, 7, 8};
+
+    // как-то заполняем m1.data случайными числами
+
+    std::stringstream ss;  // записываем данные не в файл, а просто в память (в строку)
+    m1.save(ss);
+
+    Model m2;
+    m2.load(ss);
+
+    if (m1.data != m2.data)
+        std::cout << "Models differ\n";
+}
+

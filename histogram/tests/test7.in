@@ -1,0 +1,67 @@
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
+#include <memory>
+
+class Document {
+protected:
+    std::string Content;
+public:
+    Document(std::string s): Content(std::move(s)) {}
+    virtual void Save() const = 0;
+
+    virtual ~Document() {
+
+    }
+};
+
+class PlainTextDocument: public Document {
+public:
+    PlainTextDocument(std::string s): Document(s) {}
+    void Save() const override {
+        std::cout << Content << "\n";
+    }
+};
+
+class HTMLDocument: public Document {
+public:
+    HTMLDocument(std::string s): Document(s) {}
+    void Save() const override {
+        std::cout << "<HTML><BODY>" << Content << "</BODY></HTML>\n";
+    }
+
+
+};
+
+using DocumentCollection = std::vector<std::unique_ptr<Document>>;
+
+void AddDocument(const std::string& content, const std::string& type, DocumentCollection& collection) {
+    if (type == "plain")
+        collection.push_back(std::unique_ptr<Document>(new PlainTextDocument(content)));
+    else if (type == "html")
+        collection.push_back(std::unique_ptr<Document>(new HTMLDocument(content)));
+
+}
+
+void PrintCollection(const DocumentCollection& collection) {
+    for (const auto& doc : collection) {
+        auto l = doc.get();
+        (*l).Save();
+    }
+}
+
+#include <iostream>
+#include "documents.h"
+
+int main() {
+    DocumentCollection d {};
+    AddDocument("first plain", "plain", d);
+    AddDocument("first html", "html", d);
+    AddDocument("second plain", "plain", d);
+    AddDocument("second html", "html", d);
+    PrintCollection(d);
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
+}
+
