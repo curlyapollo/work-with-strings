@@ -18,3 +18,13 @@
 Также там проведены измерения времени, так, я заметил, что при использовании регистров время работы программы уменьшилось.
 
 Спасибо, у меня всё!
+
+ассемблирование
+![assembly](https://user-images.githubusercontent.com/95444064/201298618-5faaa5ec-a087-49db-9fb8-f98c21a6397d.png)
+
+комментирование ассемблерных файлов
+![commenting](https://user-images.githubusercontent.com/95444064/201298651-6c3d85cf-ed97-43bc-8ce5-c88659548bdc.png)
+
+написание тестов!
+[tests](https://user-images.githubusercontent.com/95444064/201298709-701f0aeb-325d-4b81-887b-189b68f6ffa5.png)
+
